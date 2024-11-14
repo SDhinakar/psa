@@ -1,0 +1,43 @@
+clc;
+clear all;
+l=[1 1 2 0 0.4 
+   2 1 3 0 0.2 
+   3 2 3 0 0.2 
+   4 3 4 0 0.08];
+sz=[1 0.8 0 0];
+
+br=4;
+nbus=4;
+fb=l(:,2);
+tb=l(:,3);
+%MVAb=100;
+%KVb=11;
+% Zb=(KVb^2)/MVAb;
+% Per unit Values
+% for i=1:br
+%     R(i,1)=(l(i,4))/Zb;
+%     X(i,1)=(l(i,5))/Zb;
+% end
+for i=1:br
+    R(i,1)=(l(i,4));
+    X(i,1)=(l(i,5));
+end
+z=R+j*X;
+y=ones(br,1)./z;
+sy=ones(1,nbus)./(j*sz);
+ybus1=zeros(nbus,nbus);
+for i=1:br
+    m=fb(i);
+    n=tb(i);
+    ybus1(m,m)=ybus1(m,m)+y(i);
+    ybus1(n,n)=ybus1(n,n)+y(i);
+    ybus1(m,n)=-y(i);
+    ybus1(n,m)=ybus1(m,n);
+end
+ybus1
+for i=1:nbus
+    if (sz(i)~=0)
+    ybus1(i,i)=ybus1(i,i)+sy(i);
+    end
+end
+ybus1
