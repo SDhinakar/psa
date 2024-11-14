@@ -1,56 +1,37 @@
 clc
 clear
 global pd;
-pd = 310; % Total demand
-a = 3; % Number of generators
-min = [30 20 30]; % Minimum power limits for generators
-max = [150 100 250]; % Maximum power limits for generators
-E = [0.06 30 10; 0.1 40 15; 0.075 10 10]; % Cost coefficients for generators
-t = 0; % Initialize flag
-
-% Function to find lambda and generator power
+pd = 310;
+a = 3;
+min = [30 20 30];
+max = [150 100 250];
+E = [0.06 30 10; 0.1 40 15; 0.075 10 10];
+t = 0;
 [pg, L] = lamda(E, pd);
-
-% Generator power limit checking
 [k, ps, t] = limitchecking(pg, max, min);
-
 while(t ~= 0)
-    % Calculation of new demand and Restructuring Equations
     pdn = pd - ps;
     E1 = E;
     E1(k, :) = [];
-   
-    % New lambda and generator power calculation
     [po, L] = lamda(E1, pdn);
-   
-    % Insert the generator power which is fixed (ps)
-    pg = zeros(1, a); % Initialize to prevent indexing issues
-    pg(k) = ps; % Assign the fixed generator power
-    remaining_idx = setdiff(1:a, k); % Indices for non-fixed generators
+    pg = zeros(1, a);
+    pg(k) = ps;
+    remaining_idx = setdiff(1:a, k);
     for i = 1:length(remaining_idx)
-        pg(remaining_idx(i)) = po(i); % Assign remaining power values
+        pg(remaining_idx(i)) = po(i);
     end
-   
-    [k, ps, t] = limitchecking(pg, max, min); % Check limits again
+    [k, ps, t] = limitchecking(pg, max, min);
 end
-
-% Display final generator powers
 disp('Final Generator Powers (MW):');
 disp(pg);
-
-% Calculate total generation cost
 total_cost = 0;
 for i = 1:a
-    % Substitute p values into each generator's cost function
     cost = E(i,1)*pg(i)^2 + E(i,2)*pg(i) + E(i,3);
     total_cost = total_cost + cost;
 end
-
-% Display total cost
 disp('Total Generation Cost (in monetary units):');
 disp(total_cost);
 
-% Function Definitions
 function [p, L] = lamda(E, pd)
     [r, ~] = size(E);
     N = zeros(1, r);
@@ -60,16 +41,16 @@ function [p, L] = lamda(E, pd)
          D(i) = 1 / (2 * E(i, 1));
     end
     L = (pd + sum(N)) / sum(D);
-    p = zeros(1, r); % Initialize p with zeros to avoid indexing issues
+    p = zeros(1, r);
     for i = 1:r
          p(i) = (L - E(i, 2)) / (2 * E(i, 1));
     end
 end
 
 function [k, ps, t] = limitchecking(pg, max, min)
-    ps = 0; % Initialize power limit value
-    k = 0; % Initialize index of constrained generator
-    t = 0; % Reset status flag
+    ps = 0;
+    k = 0;
+    t = 0;
     for i = 1:length(pg)
          if (pg(i) > max(i))
              fprintf('Power of generator %d exceeds the limit, setting to max value.\n', i);
@@ -83,6 +64,6 @@ function [k, ps, t] = limitchecking(pg, max, min)
              t = 1;
              ps = min(i);
              break;
-         end
-    end
+         end
+    end
 end
