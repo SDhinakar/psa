@@ -1,0 +1,36 @@
+clc;
+clear all;
+x_prime=0.5;
+xt=0.3;
+xl1=0.35;
+p=0.6;
+v=1.0;
+h=4.5;
+f=60;
+q=0.08j;
+pm=p;
+a=p+q;
+s_conjucate=conj(a);
+v_conjucate=conj(v);
+i=s_conjucate/v_conjucate;
+x1=x_prime+xt+(xl1/2);
+E=v+(1j*x1*i);
+e=abs(E);
+p_max=(e*v)/x1;
+delta_0=asin(p/p_max);
+delta_0_deg=delta_0*(180/pi);
+fprintf('delta_0_deg:%f degree  delta_0:%f rad',delta_0_deg,delta_0);
+delta_max=pi-delta_0;
+delta_max_deg=delta_max*(180/pi);
+fprintf('\ndelta_max_deg:%f degree  delta_max:%f rad',delta_max_deg,delta_max);
+cos_delta_c=((p/p_max)*(delta_max-delta_0))+cosd(delta_max_deg);
+if cos_delta_c>1
+    cos_delta_c=1;
+elseif cos_delta_c<-1
+    cos_delta_c=-1;
+end;
+delta_c=acos(cos_delta_c);
+delta_c_deg=delta_c*(180/pi);
+fprintf('\ndelta_c_deg:%f degree  delta_c:%f rad',delta_c_deg,delta_c);
+t_cr=sqrt((2*h*(delta_c-delta_0))/(pi*f*p));
+fprintf('\nt_cr:%f sec',t_cr);
